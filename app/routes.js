@@ -150,7 +150,7 @@ module.exports = function(app, Parse) {
 
     // 5. -- OK -- Used
     // get the route associated with a tag number as a string
-    app.get('/router/:username/:secret/:tagnum', function(req, res) {
+    app.get('/route/:username/:secret/:tagnum', function(req, res) {
         var username = req.params.username;
         var password = req.params.secret;
         var tagnum = req.params.tagnum;
@@ -250,7 +250,7 @@ module.exports = function(app, Parse) {
     });
 
     // 9. -- OK -- 
-    // Pull a user's account info
+    // Pull a user's
     app.get('/user/info/:username/:secret', function(req, res) {
 
         var username = req.params.username;
