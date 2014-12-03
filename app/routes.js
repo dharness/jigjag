@@ -1,19 +1,20 @@
-/*
-This file represents the web servics.
-users of this API will make REST requests to this service
-*/
-
 //================================Routes===========================================//
+
+// ====================================================== //
+//                   Celestial Data                       //
+// ====================================================== //
+var currentUser;
 
 module.exports = function(app, Parse) {
 
     // 1. -- OK -- Used
     //..Reoute a user to their tag
-    app.get('/router/:username/:tagnum', function(req, res) {
+    app.get('/router/:username/:secret/:tagnum', function(req, res) {
         var username = req.params.username;
+        var password = req.params.secret;
         var tagnum = req.params.tagnum;
 
-        console.log(username + ' ' + tagnum);
+        Parse.User.logIn(username, password);
 
         var query = new Parse.Query(Parse.User);
         query.equalTo("username", username); // find all the women
@@ -39,7 +40,7 @@ module.exports = function(app, Parse) {
 
 
 
-    // 2. -- OK --
+    // 2. -- OK -- Used
     //edit the tag of a user
     app.put('/addtag/:username/:secret/:tagnum', function(req, res) {
         var username = req.params.username;
@@ -116,7 +117,7 @@ module.exports = function(app, Parse) {
 
     });
 
-    // 4. -- OK --
+    // 4. -- OK -- Used
     //set all the tags of a user to the same thing
     app.put('/addtag/:username/:secret', function(req, res) {
         var username = req.params.username;
@@ -147,13 +148,12 @@ module.exports = function(app, Parse) {
 
     });
 
-    // 5. -- OK --
+    // 5. -- OK -- Used
     // get the route associated with a tag number as a string
     app.get('/router/:username/:secret/:tagnum', function(req, res) {
         var username = req.params.username;
         var password = req.params.secret;
         var tagnum = req.params.tagnum;
-        var url = req.body.url;
 
         //use external parse API to validate user
         Parse.User.logIn(username, password, {
@@ -172,10 +172,11 @@ module.exports = function(app, Parse) {
 
                 } else if (tagnum == 4) {
                     res.send(user.get('tag4'));
+                } else {
+                    res.send('ERROR');
                 }
 
                 Parse.User.logOut();
-                res.send('200 OK');
             },
             error: function(user, error) { //user login infor was probably wrong
                 console.log('error');
@@ -185,7 +186,7 @@ module.exports = function(app, Parse) {
     });
 
 
-    // 6. -- OK --
+    // 6. -- OK -- Used
     //remove a user account
     app.delete('/remove/:username/:secret', function(req, res) {
         var username = req.params.username;
@@ -208,9 +209,10 @@ module.exports = function(app, Parse) {
 
 
 
-    // 7. -- OK --
+    // 7. -- OK -- Used 
     // Create a user account
     app.post('/add/:username/:secret', function(req, res) {
+
         var username = req.params.username;
         var password = req.params.secret;
         var email = req.body.email;
@@ -220,14 +222,12 @@ module.exports = function(app, Parse) {
         user.set("username", username);
         user.set("password", password);
         user.set("email", email);
-        user.save();
-
-        user.signUp(null, {
-            success: function(user) {
+        user.save(null, {
+            success: function(gameScore) {
                 res.send('200 OK');
             },
-            error: function(user, error) {
-                res.send('999 NOT OK');
+            error: function() {
+                res.send(false);
             }
         });
 
@@ -237,8 +237,6 @@ module.exports = function(app, Parse) {
     // 8. -- OK --
     // route directly to cat
     app.get('/router/cat', function(req, res) {
-        var username = req.params.username;
-        var tagnum = req.params.tagnum;
 
         var query = new Parse.Query(Parse.User);
         query.equalTo("username", username); // find all the women
@@ -251,6 +249,26 @@ module.exports = function(app, Parse) {
         });
     });
 
+    // 9. -- OK -- 
+    // Pull a user's account info
+    app.get('/user/info/:username/:secret', function(req, res) {
+
+        var username = req.params.username;
+        var password = req.params.secret;
+
+        Parse.User.logIn(username, password, {
+            success: function(user) {
+                console.log(Parse.User.current());
+                res.send(Parse.User.current());
+            },
+            error: function(user, error) { //user login infor was probably wrong
+                console.log('error');
+                res.send('900 NOTOK');
+            }
+        });
+
+
+    });
 
 
 }
